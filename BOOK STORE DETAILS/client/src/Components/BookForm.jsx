@@ -28,17 +28,17 @@ const StyledCancelButton = styled(Button)(() => ({
 }));
 
 const BookForm = ({ open, onClose, book, onSubmit, isEdit, handleInputChange }) => {
-  
+
   const handleSubmit = (event) => {
     event.preventDefault();  // Prevents default form submission behavior
-    onSubmit();  // Call the onSubmit passed as a prop
+    onSubmit();  // Call the onSubmit function passed as a prop
+    onClose();  // Close the modal after submission
   };
 
   return (
     <StyledDialog open={open} onClose={onClose}>
       <DialogTitle>{isEdit ? 'Edit Book' : 'Add New Book'}</DialogTitle>
       <DialogContent>
-        {/* Use form for better structure */}
         <form onSubmit={handleSubmit}>
           <TextField
             label="Book Name"
@@ -99,7 +99,7 @@ const BookForm = ({ open, onClose, book, onSubmit, isEdit, handleInputChange }) 
         <StyledCancelButton onClick={onClose}>
           Cancel
         </StyledCancelButton>
-        <StyledButton onClick={handleSubmit} variant="contained">
+        <StyledButton type="submit" form="book-form" variant="contained">
           {isEdit ? 'Update Book' : 'Add Book'}
         </StyledButton>
       </DialogActions>

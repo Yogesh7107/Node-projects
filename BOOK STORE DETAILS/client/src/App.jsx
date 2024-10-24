@@ -1,4 +1,4 @@
-import  { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
 import {
   Button,
@@ -17,16 +17,24 @@ import BookForm from './Components/BookForm';
 
 const App = () => {
   const [data, setData] = useState([]);
-  const [book, setBook] = useState({ name: "", author: "", image: "", price: "", description: "" });
+  const [book, setBook] = useState({
+    name: "",
+    author: "",
+    image: "",
+    price: "",
+    description: "",
+  });
   const [isEdit, setIsEdit] = useState(false);
   const [open, setOpen] = useState(false);
-
-  // Snackbar state
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState('success');
 
-  // Fetch all books
+  // Fetch all books on component mount
+  useEffect(() => {
+    fetchBooks();
+  }, []);
+
   const fetchBooks = () => {
     axios.get('http://localhost:8080/')
       .then((response) => setData(response.data))
@@ -35,31 +43,21 @@ const App = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (isEdit) {
-      axios.put(`http://localhost:8080/${book._id}`, book)
-        .then(() => {
-          fetchBooks();
-          resetForm();
-          handleClose();
-          showSnackbar('Book updated successfully!', 'success');
-        })
-        .catch((err) => {
-          console.error('Error updating book:', err);
-          showSnackbar('Error updating book!', 'error');
-        });
-    } else {
-      axios.post('http://localhost:8080/', book)
-        .then(() => {
-          fetchBooks();
-          resetForm();
-          handleClose();
-          showSnackbar('Book added successfully!', 'success');
-        })
-        .catch((err) => {
-          console.error('Error adding book:', err);
-          showSnackbar('Error adding book!', 'error');
-        });
-    }
+    const apiCall = isEdit
+      ? axios.put(`http://localhost:8080/${book._id}`, book)
+      : axios.post('http://localhost:8080/', book);
+
+    apiCall
+      .then(() => {
+        fetchBooks();
+        resetForm();
+        handleClose();
+        showSnackbar(isEdit ? 'Book updated successfully!' : 'Book added successfully!', 'success');
+      })
+      .catch((err) => {
+        console.error('Error saving book:', err);
+        showSnackbar('Error saving book!', 'error');
+      });
   };
 
   const handleDelete = (id) => {
@@ -81,17 +79,15 @@ const App = () => {
   };
 
   const resetForm = () => {
-    setBook({ name: "", author: "", image: "", price: "", description: "" });
+    setBook({
+      name: "",
+      author: "",
+      image: "",
+      price: "",
+      description: "",
+    });
     setIsEdit(false);
   };
-
-  const handleInputChange = (e) => {
-    setBook({ ...book, [e.target.name]: e.target.value });
-  };
-
-  useEffect(() => {
-    fetchBooks();
-  }, []);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -102,7 +98,10 @@ const App = () => {
     resetForm();
   };
 
-  
+  const handleInputChange = (e) => {
+    setBook({ ...book, [e.target.name]: e.target.value });
+  };
+
   const showSnackbar = (message, severity) => {
     setSnackbarMessage(message);
     setSnackbarSeverity(severity);
@@ -116,14 +115,20 @@ const App = () => {
   return (
     <Container maxWidth="lg">
       <Box my={4}>
-        <Typography variant="h3" align="center" gutterBottom sx={{ color: '#1976d2' }}> {/* Change the header color */}
+        <Typography variant="h3" align="center" gutterBottom sx={{ color: '#1976d2' }}>
           Book Store
         </Typography>
 
-        <Button variant="contained" sx={{ backgroundColor: '#ff5722', color: '#fff' }} onClick={handleClickOpen} fullWidth>
+        <Button
+          variant="contained"
+          sx={{ backgroundColor: '#ff5722', color: '#fff', mb: 4 }}
+          onClick={handleClickOpen}
+          fullWidth
+        >
           Add New Book
         </Button>
 
+        {/* Book Form Modal */}
         <BookForm
           open={open}
           onClose={handleClose}
@@ -133,7 +138,7 @@ const App = () => {
           handleInputChange={handleInputChange}
         />
 
-        <Typography variant="h5" align="center" gutterBottom mt={4} sx={{ color: '#555' }}>
+        <Typography variant="h5" align="center" gutterBottom sx={{ color: '#555', mt: 4 }}>
           Available Books
         </Typography>
 
@@ -142,16 +147,19 @@ const App = () => {
             <Grid item xs={12} sm={6} md={4} key={book._id}>
               <Paper
                 elevation={3}
-                style={{
-                  padding: '16px',
+                sx={{
+                  p: 2,
                   borderRadius: '8px',
                   textAlign: 'center',
                   transition: 'transform 0.2s',
+                  '&:hover': { transform: 'scale(1.05)' },
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
               >
-                <img src={book.image} alt={book.name} style={{ maxWidth: '100%', height: 'auto', borderRadius: '4px' }} />
+                <img
+                  src={book.image}
+                  alt={book.name}
+                  style={{ maxWidth: '100%', height: 'auto', borderRadius: '4px' }}
+                />
                 <Typography variant="h6" gutterBottom>
                   {book.name}
                 </Typography>
@@ -168,7 +176,11 @@ const App = () => {
                   <IconButton color="primary" onClick={() => handleEdit(book)}>
                     <EditIcon />
                   </IconButton>
-                  <IconButton color="secondary" onClick={() => handleDelete(book._id)} style={{ marginLeft: '8px' }}>
+                  <IconButton
+                    color="secondary"
+                    onClick={() => handleDelete(book._id)}
+                    sx={{ ml: 1 }}
+                  >
                     <DeleteIcon />
                   </IconButton>
                 </Box>
@@ -179,8 +191,16 @@ const App = () => {
       </Box>
 
       {/* Snackbar for alerts */}
-      <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleSnackbarClose}>
-        <Alert onClose={handleSnackbarClose} severity={snackbarSeverity} sx={{ width: '100%', fontSize: '1.2rem' }}> {/* Increased font size */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+      >
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={snackbarSeverity}
+          sx={{ width: '100%', fontSize: '1.2rem' }}
+        >
           {snackbarMessage}
         </Alert>
       </Snackbar>

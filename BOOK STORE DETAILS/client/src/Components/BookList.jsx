@@ -1,4 +1,3 @@
-// BookList.js
 import {
   Grid,
   Card,
@@ -23,26 +22,31 @@ const StyledCard = styled(Card)(({ theme }) => ({
   },
 }));
 
-const StyledButton = styled(Button)(( {theme} ) => ({
+const StyledButton = styled(Button)(({ theme }) => ({
   backgroundColor: '#1976d2',
   color: '#ffffff',
   boxShadow: theme.shadows[3],
-
   '&:hover': {
     backgroundColor: '#115293',
   },
   borderRadius: '8px',
 }));
 
-const StyledDeleteButton = styled(Button)(( {theme} ) => ({
+const StyledDeleteButton = styled(Button)(({ theme }) => ({
   borderColor: '#f44336',
   boxShadow: theme.shadows[3],
-
   color: '#f44336',
   borderRadius: '8px',
+  marginBottom: theme.spacing(1), // Use theme spacing for consistency
 }));
 
-const BookList = ( data, onDelete, onEdit, loading ) => {
+const StyledCardMedia = styled(CardMedia)({
+  borderTopLeftRadius: '12px',
+  borderTopRightRadius: '12px',
+  height: '200px', // Ensure consistent height for all images
+});
+
+const BookList = ({ data, onDelete, onEdit, loading }) => {
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
@@ -56,24 +60,29 @@ const BookList = ( data, onDelete, onEdit, loading ) => {
       {data.map((book) => (
         <Grid item xs={12} sm={6} md={4} key={book._id}>
           <StyledCard>
-            <CardMedia
+            <StyledCardMedia
               component="img"
-              height="200"
               image={book.image}
               alt={book.name}
-              style={{ borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }} // Match card border radius
             />
             <CardContent>
-              <Typography variant="h6" component="div">{book.name}</Typography>
-              <Typography variant="subtitle1" color="textSecondary">{book.author}</Typography>
-              <Typography variant="body2" color="textSecondary">Price: ${book.price}</Typography>
-              <Typography variant="body2" color="textSecondary" paragraph>{book.description}</Typography>
+              <Typography variant="h6" component="div">
+                {book.name}
+              </Typography>
+              <Typography variant="subtitle1" color="textSecondary">
+                {book.author}
+              </Typography>
+              <Typography variant="body2" color="textSecondary">
+                Price: ${book.price}
+              </Typography>
+              <Typography variant="body2" color="textSecondary" paragraph>
+                {book.description}
+              </Typography>
               <Box mt={2}>
                 <StyledDeleteButton
                   variant="outlined"
                   onClick={() => onDelete(book._id)}
                   fullWidth
-                  style={{ marginBottom: '10px' }}
                 >
                   Delete
                 </StyledDeleteButton>
